@@ -18,8 +18,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Operating System :: Microsoft Windows",
-        "License :: GNU General Public License v3.0"
+        "Operating System :: Microsoft :: Windows",
     ],
     install_requires=reqs,
     python_requires='>=3.7',

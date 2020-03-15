@@ -36,11 +36,13 @@ The following packages are required dependencies:
 Unfortunately, due to dependency on the [pywin32](https://github.com/mhammond/pywin32) library for controlling Excel, 
 **automate_excel** *will only work on Windows and should not be installed on other platforms*.
 
-##License
+## License
 
 [GNU General Public License v3.0](https://github.com/chrispcharlton/automate_excel/blob/master/COPYING)
 
 ## Contributions
+
+The source code is currently hosted on GitHub at https://github.com/chrispcharlton/automate_excel
 
 This library is currently under active development, with a limited set of core features that should allow for most 
 common tasks in Excel to be automated. All contributions in any form (raising issues, emails, ideas, bug reports, fixes,
