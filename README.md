@@ -4,7 +4,8 @@ in existing workbooks. It replaces the functionality of VBA with clean, pythonic
 
 Unlike other existing python packages that deal with Microsoft Excel, **automate_excel** takes the approach of directly 
 controlling the application via windows COM functionality rather than focusing on pulling functionality out of Excel 
-and into python. Because of this 
+and into python. Because of this **automate_excel** is well-suited for automating existing Excel tasks and processes, 
+especially in environments where the Excel workbook can not be replaced entirely.
 
 The **automate_excel** package provides the **Workbook** class for interfacing with documents in a Microsoft Excel 
 application. This allows users to write programs in python that automate tasks in Microsoft Excel, without Excel Macros 
@@ -21,7 +22,7 @@ with xl.Workbook('myworkbook.xlsx') as wb:
 
 ## Installation
 
-**automate_excel** can be installed from PyPI
+**automate_excel** can be installed from PyPI:
 
 ```sh
 pip install automate_excel
@@ -31,6 +32,9 @@ The following packages are required dependencies:
 - [pywin32](https://github.com/mhammond/pywin32)
 - [pandas](https://pandas.pydata.org/)
 - [Numpy](https://numpy.org/)
+
+Unfortunately, due to dependency on the [pywin32](https://github.com/mhammond/pywin32) library for controlling Excel, 
+**automate_excel** *will only work on Windows and should not be installed on other platforms*.
 
 ##License
 
