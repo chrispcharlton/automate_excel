@@ -32,6 +32,10 @@ The following packages are required dependencies:
 - [pandas](https://pandas.pydata.org/)
 - [Numpy](https://numpy.org/)
 
+##License
+
+[GNU General Public License v3.0](https://github.com/chrispcharlton/automate_excel/blob/master/COPYING)
+
 ## Contributions
 
 This library is currently under active development, with a limited set of core features that should allow for most 
