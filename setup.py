@@ -3,6 +3,9 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+with open("requirements.txt", "r") as req:
+    reqs = req.read().splitlines()
+
 setuptools.setup(
     name="automate_excel",
     version="0.0.1",
@@ -17,5 +20,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Operating System :: Microsoft Windows",
     ],
+    install_requires=reqs,
     python_requires='>=3.7',
 )
