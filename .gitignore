@@ -1,5 +1,6 @@
-# Hidden Folders
+# Hidden Files / Folders
 .*/
+.secret
 
 # Cached files
 .pytest_cache/
