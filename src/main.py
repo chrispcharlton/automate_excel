@@ -269,7 +269,11 @@ class Workbook(object):
         """
         self.workbook.Close(self.save_on_close)
         if self.quit_on_close:
-            self.app.Application.Quit()
+            self.quit()
+
+    def quit(self):
+        """Closes the Excel application."""
+        self.app.Application.Quit()
 
     def sheet(self, name: str):
         """Returns a connection to a specific sheet.
