@@ -18,4 +18,5 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from .main import Workbook, Sheet, Range, number_to_date, date_to_number, excel2df
+from .main import Workbook, Sheet, Range
+from .tools import number_to_date, date_to_number, excel2df
