@@ -1,10 +1,11 @@
+import src.tools
 from tests import testcases
 import src.main as xl
 import pytest
 
 @pytest.mark.parametrize('testcase', testcases.padded_tuple_tests)
 def test_padded_tuple(testcase):
-    assert xl.format_values(testcase.values, testcase.x, testcase.y) == testcase.expected
+    assert src.tools.format_values(testcase.values, testcase.x, testcase.y) == testcase.expected
 
 class TestRange:
     @pytest.mark.parametrize('testcase', testcases.range_tests)
