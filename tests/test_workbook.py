@@ -1,4 +1,5 @@
 import src.main as xl
+import src.tools
 from src import config
 import pytest
 import os
@@ -19,7 +20,7 @@ class TestBasicMethods:
 
     @pytest.mark.parametrize('filename', ['fail.mp3', 'fail.doc'])
     def test_open_fails(self, testdir, filename):
-        with pytest.raises(xl.ExcelError):
+        with pytest.raises(src.tools.ExcelError):
             wb = xl.Workbook(testdir.joinpath(filename))
 
     def test_path_attrs(self, open_workbook):
@@ -88,9 +89,9 @@ class TestBasicMethods:
         """
         assert isinstance(open_workbook['A1'], xl.Range)
         assert isinstance(open_workbook['A1:Z100'], xl.Range)
-        with pytest.raises(xl.ExcelError):
+        with pytest.raises(src.tools.ExcelError):
             assert open_workbook['A1:Z1048577']
-        with pytest.raises(xl.ExcelError):
+        with pytest.raises(src.tools.ExcelError):
             assert open_workbook['A1:XFE1']
 
     def test_setitem(self, open_workbook):
@@ -134,5 +135,5 @@ class TestBasicMethods:
         assert open_workbook.sheet_names == ['NewSheet2', 'Sheet1', 'NewSheet1']
         open_workbook.add_sheet('NewSheet3', after='Sheet1')
         assert open_workbook.sheet_names == ['NewSheet2', 'Sheet1', 'NewSheet3', 'NewSheet1']
-        with pytest.raises(xl.ExcelError):
+        with pytest.raises(src.tools.ExcelError):
             open_workbook.add_sheet('NewSheet1')
