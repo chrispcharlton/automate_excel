@@ -1,18 +1,11 @@
 import re
 import numpy as np
-<<<<<<< HEAD
 
-from src import config
-=======
-import pandas as pd
 from datetime import datetime
 from datetime import timedelta
-
 from typing import Any, Tuple
+
 from src import config
-from src import Workbook
-from src.main import ExcelError
->>>>>>> new_branch
 
 
 def is_iter(value: Any) -> bool:
@@ -103,19 +96,6 @@ def date_to_number(date: datetime.date) -> int:
     return number
 
 
-<<<<<<< HEAD
 class ExcelError(Exception):
     """Replaces pywintypes.com_error with more informative error messages."""
     pass
-=======
-def excel2df(filepath: str, sheet_name: str) -> pd.DataFrame:
-    with Workbook(filepath) as excel:
-        temp_path = 'C:\\Windows\\Temp\\tmpExcel.csv'
-        excel.app.Application.DisplayAlerts = False
-        if sheet_name:
-            excel.active_sheet = sheet_name
-        excel.save_as(temp_path)
-    df = pd.read_csv(temp_path)
-    os.unlink(temp_path)
-    return df
->>>>>>> new_branch
