@@ -19,11 +19,11 @@
 """
 
 import os
+import re
+import atexit
 import win32com.client
 import pywintypes
 import pandas as pd
-import re
-import atexit
 
 from src import config
 from src.tools import format_values, get_extension, validate_file_type
@@ -38,7 +38,8 @@ class Workbook(object):
     """Opens a connection to a Microsoft Excel application.
 
     Attributes:
-        save_on_close: bool, if True, the open workbook will be automatically saved (if possible) when it is closed.
+        save_on_close: bool, if True, the open workbook will be automatically saved
+        (if possible) when it is closed.
         quit_on_close: bool, if True, the application will be quit when a workbook is closed.
         app: win32com.client.dynamic.CDispatch, the connected Microsoft Excel application.
         workbook: win32com.client.dynamic.CDispatch, the open Excel workbook.
@@ -46,18 +47,27 @@ class Workbook(object):
     Arguments:
         filepath: The path to a file to open with Microsoft Excel.
         visible: bool, if False the application will not appear as a visible window.
-        save_on_close: bool, if True, the open workbook will be automatically saved (if possible) when it is closed.
+        save_on_close: bool, if True, the open workbook will be automatically saved
+            (if possible) when it is closed.
         quit_on_close: bool, if True, the application will be quit when a workbook is closed.
-        display_alerts: bool, if True Microsoft Excel will display pop up alert windows. This may interrupt control of
-            the application.
-        password: str or None, the password required to open the file defined by filepath. Not necessary if the file is
-            not password-protected.
-        write_reserved_password: str or None, the password required to write changes to the file defined by filepath.
-            Not necessary if the file is not password-protected or you do not intend to write to the file.
+        display_alerts: bool, if True Microsoft Excel will display pop up alert windows which
+            may interrupt control of the application.
+        password: str or None, the password required to open the file defined by filepath.
+            Not necessary if the file is not password-protected.
+        write_reserved_password: str or None, the password required to write
+            changes to the file defined by filepath. Not necessary if the file is not
+            password-protected or you do not intend to write to the file.
     """
-    def __init__(self, filepath:str=None, visible:bool=False, save_on_close:bool=False, quit_on_close:bool=False,
-                 display_alerts:bool=False, password:str or None=None, write_reserved_password:str or None=None):
-        self.open(validate_file_type(filepath), visible, save_on_close, quit_on_close, display_alerts, password, write_reserved_password)
+    def __init__(self, filepath:str=None, visible:bool=False, save_on_close:bool=False,
+                 quit_on_close:bool=False, display_alerts:bool=False, password:str or None=None,
+                 write_reserved_password:str or None=None):
+        self.open(validate_file_type(filepath),
+                  visible,
+                  save_on_close,
+                  quit_on_close,
+                  display_alerts,
+                  password,
+                  write_reserved_password)
         atexit.register(self.app.Application.Quit)
 
     def __enter__(self):
@@ -114,8 +124,9 @@ class Workbook(object):
         except pywintypes.com_error:
             raise ExcelError(f"Could not open sheet '{name}'.")
 
-    def open(self, filepath:str or None, visible:bool, save_on_close:bool, quit_on_close:bool, display_alerts:bool,
-             password: str or None, write_reserved_password:str or None):
+    def open(self, filepath:str or None, visible:bool, save_on_close:bool,
+             quit_on_close:bool, display_alerts:bool, password: str or None,
+             write_reserved_password:str or None):
         """Opens a Microsoft Excel application.
 
         If a string is passed to the filepath argument the application will attempt to open that file. If the file does
@@ -491,15 +502,20 @@ class Range(object):
             Self, after modifying self._range to be the new range.
         """
         if self.app.Range(self.start_cell).GetOffset(0, 1).Value2 is None:
-            end_column = re.findall('[A-Z]+',self.start_cell)[0]
+            end_column = re.findall('[A-Z]+',
+                                    self.start_cell)[0]
         else:
-            end_column = re.findall('[A-Z]+', self.app.Range(self.start_cell).End(config.xlToRight).Address.replace('$', ''))[0]
+            end_column = re.findall('[A-Z]+',
+                                    self.app.Range(self.start_cell).End(config.xlToRight).Address.replace('$', ''))[0]
         if self.app.Range(self.start_cell).GetOffset(1, 0).Value2 is None:
-            end_index = re.findall('[0-9]+',self.start_cell)[0]
+            end_index = re.findall('[0-9]+',
+                                    self.start_cell)[0]
         else:
-            end_index = re.findall('[0-9]+', self.app.Range(self.start_cell).End(config.xlDown).Address.replace('$', ''))[0]
+            end_index = re.findall('[0-9]+',
+                                   self.app.Range(self.start_cell).End(config.xlDown).Address.replace('$', ''))[0]
         end_cell = ''.join([end_column,end_index])
-        self._range = self.app.Range(':'.join([self.start_cell, end_cell]))
+        self._range = self.app.Range(':'.join([self.start_cell,
+                                               end_cell]))
         return self
 
     def to_dataframe(self, header: bool=False, index: bool=False):
