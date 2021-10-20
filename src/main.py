@@ -476,21 +476,22 @@ class Range():
     def values(self, values):
         """Sets the values of the cells in a range.
 
-        The values can be single values, for example:
-            >>>spreadsheet['A1'].values = 1
-            >>>spreadsheet['A1:B2'].values = 'abc'
-
-        Or an iterable (which can contain other iterables to form a matrix-like data structure),
-        for example:
-            >>>spreadsheet['A1:B2'].values = (('a', 'b'), ('c', 'd'))
-
-        Or a pandas DataFrame. If a DataFrame is passed the column names and index will not be
-        inserted, only the values of the DataFrame will be used.
-
         Arguments:
-            values: the values to insert into cells. This can be a single value (will set only
-            the first cell of the range), an iterable or a pandas DataFrame. If fewer values are
-            passed then there are cells in the range, the remaining cells will be left blank.
+            values: the values to insert into cells. This can be a single value (will set only the first cell of the
+                range), an iterable or a pandas DataFrame. If fewer values are passed then there are cells in the range,
+                the remaining cells will be left blank.
+
+        Examples:
+            The values can be single values, for example:
+                >>>spreadsheet['A1'].values = 1
+
+                >>>spreadsheet['A1:B2'].values = 'abc'
+
+            Or an iterable (which can contain other iterables to form a matrix-like data structure), for example:
+                >>>spreadsheet['A1:B2'].values = (('a', 'b'), ('c', 'd'))
+
+            Or a pandas DataFrame. If a DataFrame is passed the column names and index will not be inserted, only the
+            values of the DataFrame will be used.
         """
         if isinstance(values, pd.core.frame.DataFrame):
             values = tuple(map(tuple, values.values))
@@ -518,12 +519,15 @@ class Range():
     def select_table(self):
         """Adds all non-empty adjacent cells to the range.
 
-        The current range will be extended both horizontally and vertically until a
-        blank cell is encountered. Similar in functionality to using
-        ctrl + shift + down/right arrow keys in Microsoft Excel.
+        The current range will be extended first horizontally and then vertically until a blank cell is encountered.
+        Similar in functionality to using ctrl + shift + down/right arrow keys in Microsoft Excel.
 
         Returns:
             Self, after modifying self._range to be the new range.
+
+        Examples:
+            The table selection is done by referencing the starting cell as follows:
+                >>>spreadsheet['B10'].select_table()
         """
         if self.app.Range(self.start_cell).GetOffset(0, 1).Value2 is None:
             end_column = re.findall('[A-Z]+',

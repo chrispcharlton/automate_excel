@@ -1,17 +1,22 @@
+import os
 import re
-from datetime import datetime, timedelta
-
 import numpy as np
+import pandas as pd
+from datetime import datetime
+from datetime import timedelta
 
+from typing import Any, Tuple
 from src import config
+from src import Workbook
+from src.main import ExcelError
 
 
-def is_iter(value):
+def is_iter(value: Any) -> bool:
     """Returns True if a value is a non-str iterable."""
     return hasattr(value, '__iter__') and not isinstance(value, str)
 
 
-def format_values(values, rows: int, col: int):
+def format_values(values: Any, rows: int, col: int) -> Tuple[Tuple[Any, ...], ...]:
     """Formats values into tuples appropriate for passing to an excel range.
 
     Values will be transformed into a tuple containing 'rows' number of tuples, each of length 'cols'. These tuples are
@@ -48,7 +53,7 @@ def format_values(values, rows: int, col: int):
     return tuple(map(tuple, array))
 
 
-def get_extension(filepath: str):
+def get_extension(filepath: str) -> str:
     """Returns the file extension from a filepath, the suffix delimited by (and including) the final fullstop.
 
     Arguments:
@@ -61,7 +66,7 @@ def get_extension(filepath: str):
     return ext if ext else None
 
 
-def validate_file_type(filepath: str):
+def validate_file_type(filepath: str) -> str:
     """Checks if a file is a type that is supported by Microsoft Excel.
 
     Supported formats are defined in the config file.
@@ -82,18 +87,25 @@ def validate_file_type(filepath: str):
     return filepath
 
 
-def number_to_date(number):
+def number_to_date(number: int) -> datetime.date:
     date_origin = datetime(1899, 12, 30)
     new_date = date_origin + timedelta(days=number)
     return new_date
 
 
-def date_to_number(date):
+def date_to_number(date: datetime.date) -> int:
     date_origin = datetime(1899, 12, 30).date()
     number = (date - date_origin).days()
     return number
 
 
-class ExcelError(Exception):
-    """Replaces pywintypes.com_error with more informative error messages."""
-    pass
+def excel2df(filepath: str, sheet_name: str) -> pd.DataFrame:
+    with Workbook(filepath) as excel:
+        temp_path = 'C:\\Windows\\Temp\\tmpExcel.csv'
+        excel.app.Application.DisplayAlerts = False
+        if sheet_name:
+            excel.active_sheet = sheet_name
+        excel.save_as(temp_path)
+    df = pd.read_csv(temp_path)
+    os.unlink(temp_path)
+    return df
