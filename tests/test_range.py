@@ -17,7 +17,7 @@ class TestRange:
     @pytest.mark.parametrize('testcase', testcases.range_tests_fail)
     def test_values_fail(self, open_workbook, testcase):
         """Test that Range.values setter raises the correct exception when expected to fail."""
-        with pytest.raises(xl.ExcelError):
+        with pytest.raises(src.tools.ExcelError):
             open_workbook[testcase.range] = testcase.values
 
     def test_name(self, open_workbook):

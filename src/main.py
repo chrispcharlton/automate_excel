@@ -26,12 +26,7 @@ import re
 import atexit
 
 from src import config
-from src.tools import format_values, get_extension, validate_file_type
-
-
-class ExcelError(Exception):
-    """Replaces pywintypes.com_error with more informative error messages."""
-    pass
+from src.tools import format_values, get_extension, validate_file_type, ExcelError
 
 
 class Workbook(object):
@@ -362,7 +357,7 @@ class Range(object):
         try:
             self._range = application.Range(range)
         except pywintypes.com_error:
-            raise ExcelError('Could not find range "'+range+'"')
+            raise ExcelError('Could not find range "' + range + '"')
 
     def __len__(self):
         list_of_values = [element for tupl in self._range for element in tupl]
@@ -645,3 +640,15 @@ class Sheet(object):
     def open_in_new_workbook(self):
         """Opens a new workbook that contains only a copy of the sheet."""
         self.sheet.Copy()
+
+
+def excel2df(filepath: str, sheet_name: str):
+    with Workbook(filepath) as excel:
+        temp_path = 'C:\\Windows\\Temp\\tmpExcel.csv'
+        excel.app.Application.DisplayAlerts = False
+        if sheet_name:
+            excel.active_sheet = sheet_name
+        excel.save_as(temp_path)
+    df = pd.read_csv(temp_path)
+    os.unlink(temp_path)
+    return df
