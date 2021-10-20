@@ -29,7 +29,7 @@ from src import config
 from src.tools import format_values, get_extension, validate_file_type, ExcelError
 
 
-class Workbook(object):
+class Workbook():
     """Opens a connection to a Microsoft Excel application.
 
     Attributes:
@@ -116,28 +116,31 @@ class Workbook(object):
             raise ExcelError(f"No sheet named '{name}' in {self.name}.")
         try:
             self.app.Worksheets(name).Activate()
-        except pywintypes.com_error:
-            raise ExcelError(f"Could not open sheet '{name}'.")
+        # pylint: disable=no-member
+        except pywintypes.com_error as com_error:
+            raise ExcelError(f"Could not open sheet '{name}'.") from com_error
 
     def open(self, filepath:str or None, visible:bool, save_on_close:bool,
              quit_on_close:bool, display_alerts:bool, password: str or None,
              write_reserved_password:str or None):
         """Opens a Microsoft Excel application.
 
-        If a string is passed to the filepath argument the application will attempt to open that file. If the file does
-        not exist a new file will be opened and saved to the provided filepath.
+        If a string is passed to the filepath argument the application will attempt to open that file.
+        If the file does not exist a new file will be opened and saved to the provided filepath.
 
         Arguments:
             filepath: The path to a file to open with Microsoft Excel.
             visible: bool, if False the application will not appear as a visible window.
-            save_on_close: bool, if True, the open workbook will be automatically saved (if possible) when it is closed.
+            save_on_close: bool, if True, the open workbook will be automatically saved
+                (if possible) when it is closed.
             quit_on_close: bool, if True, the application will be quit when a workbook is closed.
-            display_alerts: bool, if True Microsoft Excel will display pop up alert windows. This may interrupt control of
-                the application.
-            password: str or None, the password required to open the file defined by filepath. Not necessary if the file is
-                not password-protected.
-            write_reserved_password: str or None, the password required to write changes to the file defined by filepath.
-                Not necessary if the file is not password-protected or you do not intend to write to the file.
+            display_alerts: bool, if True Microsoft Excel will display pop up alert windows.
+                This may interrupt control of the application.
+            password: str or None, the password required to open the file defined by filepath.
+                Not necessary if the file is not password-protected.
+            write_reserved_password: str or None, the password required to write changes to
+                the file defined by filepath. Not necessary if the file is not password-protected
+                or you do not intend to write to the file.
 
         Returns:
             self
@@ -148,8 +151,9 @@ class Workbook(object):
         """
         try:
             self.app = win32com.client.dynamic.Dispatch('Excel.Application')
-        except pywintypes.com_error:
-            raise ExcelError('Could not open Microsoft Excel Application.')
+        # pylint: disable=no-member
+        except pywintypes.com_error as com_error:
+            raise ExcelError('Could not open Microsoft Excel Application.') from com_error
         self.app.Visible = visible
         self.app.Application.DisplayAlerts = display_alerts
         self.app.AskToUpdateLinks = False
@@ -161,9 +165,12 @@ class Workbook(object):
             path = os.path.abspath(filepath)
             try:
                 # TODO: provide options for the inputs that are hardcoded in the Open() call
-                self.workbook = self.app.Application.Workbooks.Open(path, False, False, None, password, write_reserved_password)
-            except pywintypes.com_error:
-                raise ExcelError(f"Could not open file '{filepath}'.")
+                self.workbook = self.app.Application.Workbooks.Open(path, False, False,
+                                                                    None, password,
+                                                                    write_reserved_password)
+            # pylint: disable=no-member
+            except pywintypes.com_error as com_error:
+                raise ExcelError(f"Could not open file '{filepath}'.") from com_error
         else:
             self.workbook = self.app.Application.Workbooks.Add()
             if filepath:
@@ -174,9 +181,10 @@ class Workbook(object):
     def close(self):
         """Closes the current open workbook.
 
-        If the save_on_close attribute is True, the workbook will be saved before closing. If the quit_on_close
-        attribute is True the Microsoft Excel application will be quit as well. Note that this will also close workbooks
-        that were not opened with this instance of the application.
+        If the save_on_close attribute is True, the workbook will be saved before closing.
+        If the quit_on_close attribute is True the Microsoft Excel application will be quit as
+        well. Note that this will also close workbooks that were not opened with this instance
+        of the application.
         """
         self.workbook.Close(self.save_on_close)
         if self.quit_on_close:
@@ -189,8 +197,8 @@ class Workbook(object):
     def sheet(self, name: str):
         """Returns a connection to a specific sheet.
 
-        Note that this will not make the sheet the active sheet. It is generally preferable to interact with worksheets
-        via the active_sheet property for this reason.
+        Note that this will not make the sheet the active sheet. It is generally preferable
+        to interact with worksheets via the active_sheet property for this reason.
 
         Arguments:
             name: str, the name of the worksheet.
@@ -219,7 +227,8 @@ class Workbook(object):
     def add_sheet(self, name:str, before:str or None=None, after:str or None=None):
         """Creates a new sheet in the open workbook.
 
-        If no sheet names are passed to before or after, the sheet will be created behind all existing sheets.
+        If no sheet names are passed to before or after, the sheet will be created
+        behind all existing sheets.
 
         Arguments:
             name: str, the name to give the new worksheet.
@@ -253,25 +262,27 @@ class Workbook(object):
         """
         try:
             self.app.ActiveWorkbook.Save()
-        except pywintypes.com_error:
-            raise ExcelError(f"Failed to save workbook '{self.name}'")
+        # pylint: disable=no-member
+        except pywintypes.com_error as com_error:
+            raise ExcelError(f"Failed to save workbook '{self.name}'") from com_error
 
-    def save_as(self, filepath:str, password:str or None=None, write_reserved_password:str or None=None,
+    def save_as(self, filepath:str, password:str or None=None,
+                write_reserved_password:str or None=None,
                 read_only_recommended:bool=False):
         """Saves the open workbook as a new file.
 
-        The new file will become the open workbook. If the provided filepath includes a file extension, the new file
-        will be of that type. Otherwise the new file type will be the default save format of the Microsoft Excel
-        application being used.
+        The new file will become the open workbook. If the provided filepath includes a file
+        extension, the new file will be of that type. Otherwise the new file type will be the
+        default save format of the Microsoft Excel application being used.
 
         Arguments:
             filepath: The path to save the new file as.
             password: str or None, the password to add to the new file.
                 not password-protected.
-            write_reserved_password: str or None, the write-reserved password to add to the new file. If None the new
-                file will not require a password to write to the file.
-            read_only_recommended: bool, if True, the new file will prompt a user to choose between read-only and
-                write mode when opening the new file.
+            write_reserved_password: str or None, the write-reserved password to add to the new file.
+                If None the new file will not require a password to write to the file.
+            read_only_recommended: bool, if True, the new file will prompt a user to choose between
+                read-only and write mode when opening the new file.
 
         Raises:
             ExcelError if the file can not be saved.
@@ -283,16 +294,18 @@ class Workbook(object):
         else:
             code = self.app.DefaultSaveFormat
         try:
-            self.app.ActiveWorkbook.SaveAs(filepath, code, password, write_reserved_password, read_only_recommended)
-        except:
+            self.app.ActiveWorkbook.SaveAs(filepath, code, password,
+                                           write_reserved_password,
+                                           read_only_recommended)
+        except Exception as excel_error:
             raise ExcelError(f"Could not save workbook '{self.name}' as '{filepath}.' \n"
-                             f"Check that the destination path is correctly formatted.")
+                             f"Check that the destination path is correctly formatted.") from excel_error
 
     def save_copy_as(self, filepath: str):
         """Saves a copy of the open workbook as a new file.
 
-        The copy is a different file from the open workbook. When saving a copy, the filepath must include the file
-        type extension.
+        The copy is a different file from the open workbook. When saving a copy, the filepath
+        must include the file type extension.
 
         Arguments:
             filepath: The path to save the new file as.
@@ -307,9 +320,9 @@ class Workbook(object):
             raise ExcelError('Saving as a copy requires the path to include a file extension.')
         try:
             self.app.ActiveWorkbook.SaveCopyAs(filepath)
-        except:
+        except Exception as excel_error:
             raise ExcelError(f"Could not save a copy of workbook '{self.name}' as '{filepath}.' \n"
-                             f"Check that the destination path is correctly formatted.")
+                             f"Check that the destination path is correctly formatted.") from excel_error
 
     def calculate(self, active_sheet_only: bool=False):
         """Recalculates the values of any cells containing formulas.
@@ -333,19 +346,20 @@ class Workbook(object):
         """
         try:
             self.app.Application.Run(name)
-        except:
-            raise ExcelError(f"Could not run macro '{name}' in workbook '{self.name}'.")
+        except Exception as excel_error:
+            raise ExcelError(f"Could not run macro '{name}' in workbook '{self.name}'.") from excel_error
 
     def autofit(self):
         self.workbook.ActiveSheet.Columns.AutoFit()
 
 
-class Range(object):
+class Range():
     """An object representing a range of cells in a Microsoft Excel workbook.
 
     Attributes:
         app: the Microsoft Excel application that the workbook the range belongs to is open in.
-        sheet: the win32com.client.CDispatch object referring to the worksheet that this cell range is on.
+        sheet: the win32com.client.CDispatch object referring to the worksheet that
+            this cell range is on.
         dim: tuple, the number of columns, rows in this range.
         rows: int, the number of rows in the range.
         columns: int, the number of columns in the range.
@@ -359,16 +373,17 @@ class Range(object):
         _range: the win32com.client.CDispatch object referring to this range.
 
     Arguments:
-        application: win32com.client.CDispatch, the Microsoft Excel application that the workbook the range belongs to
-            is open in.
+        application: win32com.client.CDispatch, the Microsoft Excel application that the workbook
+            the range belongs to is open in.
         range: str, the cell reference in Microsoft Excel syntax.
     """
     def __init__(self, application: win32com.client.CDispatch, range: str):
         self.app = application
         try:
             self._range = application.Range(range)
-        except pywintypes.com_error:
-            raise ExcelError('Could not find range "' + range + '"')
+        # pylint: disable=no-member
+        except pywintypes.com_error as com_error:
+            raise ExcelError('Could not find range "' + range + '"') from com_error
 
     def __len__(self):
         list_of_values = [element for tupl in self._range for element in tupl]
@@ -379,45 +394,57 @@ class Range(object):
 
     @property
     def sheet(self):
+        """Returns the win32com.client.CDispatch object referring to the worksheet
+        that this cell range is on"""
         return self._range.Worksheet
 
     @property
     def dim(self):
+        """Returns the number of columns, rows in this range as a tuple"""
         return self._range.Columns.Count, self._range.Rows.Count
 
     @property
     def rows(self):
+        """Returns the amount of rows in the range"""
         return self._range.Rows.Count
 
     @property
     def columns(self):
+        """Returns the amount of columns in the range"""
         return self._range.Columns.Count
 
     @property
     def values(self):
+        """Returns the values of the cells in the range"""
         return self._range.Value2
 
     @property
     def name(self):
+        """Returns the name of the range if applicable"""
         try:
             return self._range.Name.Name
+        # pylint: disable=no-member
         except pywintypes.com_error:
             return None
 
     @property
     def start_cell(self):
+        """Returns the first cell in the range"""
         return self.address.split(':')[0]
 
     @property
     def address(self):
+        """Returns the definition of the range (without $)"""
         return re.sub('\$','', self._range.Address)
 
     @property
     def number_format(self):
+        """Returns code denoting the formatting rules for numbers in this cell."""
         return self._range.NumberFormat
 
     @property
     def has_data_validation(self):
+        """Returns a bool dependant on whether the range has data validation."""
         try:
             type = self._range.Validation.Type
             return True
@@ -426,17 +453,17 @@ class Range(object):
 
     @property
     def comment(self):
+        """Returns the comment (if any) attached to the first cell in the range."""
         if self._range.Cells(1).Comment:
             return self._range.Cells(1).Comment.Text()
-        else:
-            return None
+        return None
 
     @comment.setter
     def comment(self, text: str):
         """Adds a comment to the first cell in a range.
 
-        For example, if the range is 'A1:B2' then the comment will be added to cell 'A1'. Other comments will be
-        removed from the cell.
+        For example, if the range is 'A1:B2' then the comment will be added to cell 'A1'.
+        Other comments will be removed from the cell.
 
         Arguments:
             text: str, the comment to add.
@@ -453,16 +480,17 @@ class Range(object):
             >>>spreadsheet['A1'].values = 1
             >>>spreadsheet['A1:B2'].values = 'abc'
 
-        Or an iterable (which can contain other iterables to form a matrix-like data structure), for example:
+        Or an iterable (which can contain other iterables to form a matrix-like data structure),
+        for example:
             >>>spreadsheet['A1:B2'].values = (('a', 'b'), ('c', 'd'))
 
-        Or a pandas DataFrame. If a DataFrame is passed the column names and index will not be inserted, only the
-        values of the DataFrame will be used.
+        Or a pandas DataFrame. If a DataFrame is passed the column names and index will not be
+        inserted, only the values of the DataFrame will be used.
 
         Arguments:
-            values: the values to insert into cells. This can be a single value (will set only the first cell of the
-                range), an iterable or a pandas DataFrame. If fewer values are passed then there are cells in the range,
-                the remaining cells will be left blank.
+            values: the values to insert into cells. This can be a single value (will set only
+            the first cell of the range), an iterable or a pandas DataFrame. If fewer values are
+            passed then there are cells in the range, the remaining cells will be left blank.
         """
         if isinstance(values, pd.core.frame.DataFrame):
             values = tuple(map(tuple, values.values))
@@ -490,8 +518,9 @@ class Range(object):
     def select_table(self):
         """Adds all non-empty adjacent cells to the range.
 
-        The current range will be extended both horizontally and vertically until a blank cell is encountered. Similar
-        in functionality to using ctrl + shift + down/right arrow keys in Microsoft Excel.
+        The current range will be extended both horizontally and vertically until a
+        blank cell is encountered. Similar in functionality to using
+        ctrl + shift + down/right arrow keys in Microsoft Excel.
 
         Returns:
             Self, after modifying self._range to be the new range.
@@ -501,13 +530,19 @@ class Range(object):
                                     self.start_cell)[0]
         else:
             end_column = re.findall('[A-Z]+',
-                                    self.app.Range(self.start_cell).End(config.xlToRight).Address.replace('$', ''))[0]
+                                    self.app.Range(self.start_cell)
+                                    .End(config.xlToRight)
+                                    .Address
+                                    .replace('$', ''))[0]
         if self.app.Range(self.start_cell).GetOffset(1, 0).Value2 is None:
             end_index = re.findall('[0-9]+',
                                     self.start_cell)[0]
         else:
             end_index = re.findall('[0-9]+',
-                                   self.app.Range(self.start_cell).End(config.xlDown).Address.replace('$', ''))[0]
+                                   self.app.Range(self.start_cell)
+                                   .End(config.xlDown)
+                                   .Address
+                                   .replace('$', ''))[0]
         end_cell = ''.join([end_column,end_index])
         self._range = self.app.Range(':'.join([self.start_cell,
                                                end_cell]))
@@ -524,13 +559,14 @@ class Range(object):
             A pandas DataFrame.
         """
         if self.values:
-            df = pd.DataFrame([value for value in self.values])
+            dataframe = pd.DataFrame(list(self.values))
             if header:
-                df.columns = df.iloc[0]
-                df = df.iloc[1:]
+                dataframe.columns = dataframe.iloc[0]
+                dataframe = dataframe.iloc[1:]
             if index:
-                df.set_index(df.columns[0],drop=True,inplace=True)
-            return df
+                dataframe.set_index(dataframe.columns[0],drop=True,inplace=True)
+            return dataframe
+        return None
 
     def copy(self):
         """Copies the range to clipboard."""
@@ -581,8 +617,9 @@ class Range(object):
     def data_validation_from_list(self, list: list):
         """Adds data validation to the range based on a list of values.
 
-        This adds a drop down menu to the range allowing users to select a value based on the contents of 'list'. This
-        is not enforced when interacting with Microsoft Excel via this package or VBA however.
+        This adds a drop down menu to the range allowing users to select a value based
+        on the contents of 'list'. This is not enforced when interacting with Microsoft
+        Excel via this package or VBA however.
 
         Arguments:
             list: list, the list of values allowed for this range.
@@ -592,7 +629,7 @@ class Range(object):
         self._range.Validation.Add(Type=3, AlertStyle=1, Operator=1, Formula1=formula)
 
 
-class Sheet(object):
+class Sheet():
     """A specific worksheet in a Microsoft Excel workbook.
 
     This object contains attributes and methods for interacting with the worksheet.
@@ -603,8 +640,10 @@ class Sheet(object):
         name: str, the name of the worksheet.
 
     Arguments:
-        workbook: Workbook, a workbook instance referring to the open workbook that this sheet exists in.
-        name: str or None, the name of the worksheet to access. If None, the active worksheet will be used.
+        workbook: Workbook, a workbook instance referring to the open
+            workbook that this sheet exists in.
+        name: str or None, the name of the worksheet to access.
+            If None, the active worksheet will be used.
     """
     def __init__(self, workbook: Workbook, name: str=None):
         self.workbook = workbook
@@ -615,6 +654,7 @@ class Sheet(object):
 
     @property
     def name(self):
+        """Returns the name of the worksheet"""
         return self.sheet.Name
 
     @name.setter
@@ -622,18 +662,21 @@ class Sheet(object):
         """Renames the worksheet."""
         self.sheet.Name = name
 
-    def to_csv(self, path:str or None=None, password: str or None=None, write_reserved_password: str or None=None,
+    def to_csv(self, path:str or None=None,
+               password: str or None=None,
+               write_reserved_password: str or None=None,
                read_only_recommended: bool=False):
         """Saves the contents of the worksheet as a .csv file.
 
         Arguments:
-            path: str or None, the path to the new file. If no path is supplied, the workbook name will be used.
-            password: str or None, the password to add to the new file. If None the new file will not be
-                password-protected.
-            write_reserved_password: str or None, the write-reserved password to add to the new file. If None the new
-                file will not require a password to write to the file.
-            read_only_recommended: bool, if True, the new file will prompt a user to choose between read-only and
-                write mode when opening the new file.
+            path: str or None, the path to the new file. If no path is supplied,
+                the workbook name will be used.
+            password: str or None, the password to add to the new file. If None the new file
+                will not be password-protected.
+            write_reserved_password: str or None, the write-reserved password to add to the new
+                file. If None the new file will not require a password to write to the file.
+            read_only_recommended: bool, if True, the new file will prompt a user to choose
+                between read-only and write mode when opening the new file.
 
         Raises:
             ExcelError if the .csv fails to save.
@@ -643,9 +686,11 @@ class Sheet(object):
         if not get_extension(path) == '.csv':
             path = path + '.csv'
         try:
-            self.sheet.SaveAs(path, config.ext_save_codes['.csv'], password, write_reserved_password, read_only_recommended)
-        except pywintypes.com_error:
-            raise ExcelError(f"Failed to save sheet {self.name} as '{path}'")
+            self.sheet.SaveAs(path, config.ext_save_codes['.csv'],
+                              password, write_reserved_password, read_only_recommended)
+        # pylint: disable=no-member
+        except pywintypes.com_error as com_error:
+            raise ExcelError(f"Failed to save sheet {self.name} as '{path}'") from com_error
 
     def open_in_new_workbook(self):
         """Opens a new workbook that contains only a copy of the sheet."""
@@ -653,12 +698,21 @@ class Sheet(object):
 
 
 def excel2df(filepath: str, sheet_name: str):
+    """Creates a dataframe based on a provided excel sheet.
+
+    Arguments:
+        filepath: str, the path to the excel file
+        sheet_name: str, the specific sheet name to be converted
+
+    Returns:
+        A dataframe based on the sheet specified.
+        """
     with Workbook(filepath) as excel:
         temp_path = 'C:\\Windows\\Temp\\tmpExcel.csv'
         excel.app.Application.DisplayAlerts = False
         if sheet_name:
             excel.active_sheet = sheet_name
         excel.save_as(temp_path)
-    df = pd.read_csv(temp_path)
+    dataframe = pd.read_csv(temp_path)
     os.unlink(temp_path)
-    return df
+    return dataframe
