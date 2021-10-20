@@ -1,12 +1,9 @@
-import os
 import re
 from datetime import datetime, timedelta
 
 import numpy as np
-import pandas as pd
 
-from src import config, Workbook
-from src.main import ExcelError
+from src import config
 
 
 def is_iter(value):
@@ -97,13 +94,6 @@ def date_to_number(date):
     return number
 
 
-def excel2df(filepath: str, sheet_name: str):
-    with Workbook(filepath) as excel:
-        temp_path = 'C:\\Windows\\Temp\\tmpExcel.csv'
-        excel.app.Application.DisplayAlerts = False
-        if sheet_name:
-            excel.active_sheet = sheet_name
-        excel.save_as(temp_path)
-    df = pd.read_csv(temp_path)
-    os.unlink(temp_path)
-    return df
+class ExcelError(Exception):
+    """Replaces pywintypes.com_error with more informative error messages."""
+    pass
