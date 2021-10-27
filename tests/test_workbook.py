@@ -1,6 +1,6 @@
 import src.range
 import src.sheet
-import src.workbook as xl
+import src.main as xl
 import src.tools
 from src import config
 import pytest

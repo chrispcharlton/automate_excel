@@ -1,6 +1,6 @@
 import src.tools
 from tests import testcases
-import src.workbook as xl
+import src.main as xl
 import pytest
 
 @pytest.mark.parametrize('testcase', testcases.padded_tuple_tests)
