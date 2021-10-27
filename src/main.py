@@ -57,6 +57,7 @@ class Workbook():
     def __init__(self, filepath:str=None, visible:bool=False, save_on_close:bool=False,
                  quit_on_close:bool=False, display_alerts:bool=False, password:str or None=None,
                  write_reserved_password:str or None=None):
+        self.Workbook = None
         self.open(validate_file_type(filepath),
                   visible,
                   save_on_close,
@@ -335,6 +336,18 @@ class Workbook():
             self.app.ActiveSheet.Calculate()
         else:
             self.app.Application.Calculate()
+
+    def refresh_pivots(self):
+        """Refreshes all pivot tables in the workbook.
+        """
+        sheets = len([sheet.Name for sheet in self.app.Sheets])
+        for sheet in range(sheets):
+            worksheet = self.workbook.Worksheets[sheet]
+            worksheet.Unprotect()  # if protected
+
+            pivotCount = worksheet.PivotTables().Count
+            for i in range(1, pivotCount + 1):
+                worksheet.PivotTables(i).PivotCache().Refresh()
 
     def run_macro(self, name: str):
         """Runs a macro of the open workbook.
