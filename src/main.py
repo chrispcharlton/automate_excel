@@ -332,7 +332,6 @@ class Workbook():
     def autofit(self):
         self.workbook.ActiveSheet.Columns.AutoFit()
 
-
 def excel2df(filepath: str, sheet_name: str):
     """Creates a dataframe based on a provided excel sheet.
     Arguments:
