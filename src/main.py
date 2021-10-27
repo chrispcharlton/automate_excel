@@ -600,36 +600,19 @@ class Range():
         self._range.Select()
         self.app.ActiveSheet.Paste()
 
-    def clear(self, type='all'):
-        """Removes things from the range.
+    def clear_all(self):
+        """Removes everything from the range (both values and formatting)"""
+        self._range.Clear()
 
-        There are 5 possible values for 'type':
-            all: clear everything from the range (including values).
-            contents: clear values.
-            formats: clear formatting.
-            comments: clear any comments.
-            outlines: clear any outlines.
+    def clear_values(self):
+        """Removes the values from the range"""
+        self._range.ClearContents()
 
-        By default, everything will be cleared from the range.
-
-        Arguments:
-            type: str, what to clear from the range.
-
-        Raises:
-            ExcelError if a type that is not handled is passed.
-        """
-        if type == 'all':
-            self._range.Clear()
-        elif type == 'contents':
-            self._range.ClearContents()
-        elif type == 'formats':
-            self._range.ClearFormats()
-        elif type == 'comments':
-            self._range.ClearComments()
-        elif type == 'outlines':
-            self._range.ClearOutline()
-        else:
-            raise ExcelError(f"'{type}' is not a valid argument for Range.clear().")
+    def clear_formatting(self):
+        """Removes all formatting from the range including comments and outlines"""
+        self._range.ClearFormats()
+        self._range.ClearComments()
+        self._range.ClearOutline()
 
     def data_validation_from_list(self, list: list):
         """Adds data validation to the range based on a list of values.
