@@ -24,6 +24,7 @@ import atexit
 import win32com.client
 import pywintypes
 import pandas as pd
+from typing import Tuple, Union
 
 from src import config
 from src.tools import format_values, get_extension, validate_file_type, ExcelError
@@ -56,6 +57,7 @@ class Workbook():
     def __init__(self, filepath:str=None, visible:bool=False, save_on_close:bool=False,
                  quit_on_close:bool=False, display_alerts:bool=False, password:str or None=None,
                  write_reserved_password:str or None=None):
+        self.Workbook = None
         self.open(validate_file_type(filepath),
                   visible,
                   save_on_close,
@@ -335,6 +337,18 @@ class Workbook():
         else:
             self.app.Application.Calculate()
 
+    def refresh_pivots(self):
+        """Refreshes all pivot tables in the workbook.
+        """
+        sheets = len([sheet.Name for sheet in self.app.Sheets])
+        for sheet in range(sheets):
+            worksheet = self.workbook.Worksheets[sheet]
+            worksheet.Unprotect()  # if protected
+
+            pivotCount = worksheet.PivotTables().Count
+            for i in range(1, pivotCount + 1):
+                worksheet.PivotTables(i).PivotCache().Refresh()
+
     def run_macro(self, name: str):
         """Runs a macro of the open workbook.
 
@@ -376,11 +390,32 @@ class Range():
         application: win32com.client.CDispatch, the Microsoft Excel application that the workbook
             the range belongs to is open in.
         range: str, the cell reference in Microsoft Excel syntax.
+
+    Examples:
+        The range can be referenced as a string or as a number combination. In the following example, cell 'A5' is
+        equivalent to tuple (1, 5):
+            >>>spreadhseet['A5']
+
+            >>>spreadsheet[1, 5]
+
+        A range of more than one cell can be called as well using string or tuple combinations. In the following
+        example, the range 'A1:B5' is equivalent to ((1, 1), (5, 1)):
+            >>>spreadsheet['A1:B5']
+
+            >>>spreadsheet[(1, 1), (5, 1)]
     """
-    def __init__(self, application: win32com.client.CDispatch, range: str):
+    def __init__(self, application: win32com.client.CDispatch,
+                 range: Union[str, Tuple[int, int], Tuple[Tuple[int, int], Tuple[int, int]]]):
         self.app = application
         try:
-            self._range = application.Range(range)
+            if isinstance(range, tuple):
+                if isinstance(range[0], tuple):
+                    self._range = application.Range(application.Cells(range[0][0], range[0][1]),
+                                                    application.Cells(range[1][0], range[1][1]))
+                else:
+                    self._range = application.Cells(range[0], range[1])
+            else:
+                self._range = application.Range(range)
         # pylint: disable=no-member
         except pywintypes.com_error as com_error:
             raise ExcelError('Could not find range "' + range + '"') from com_error
@@ -485,7 +520,7 @@ class Range():
             The values can be single values, for example:
                 >>>spreadsheet['A1'].values = 1
 
-                >>>spreadsheet['A1:B2'].values = 'abc'
+                >>>spreadsheet[(1, 2), (2, 5)].values = 'abc'
 
             Or an iterable (which can contain other iterables to form a matrix-like data structure), for example:
                 >>>spreadsheet['A1:B2'].values = (('a', 'b'), ('c', 'd'))
