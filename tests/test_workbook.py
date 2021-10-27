@@ -1,6 +1,4 @@
-import src.workbook as xl
-import src.range
-import src.sheet
+import src.main as xl
 import src.tools
 from src import config
 import pytest
@@ -89,8 +87,8 @@ class TestBasicMethods:
         Check that __getitem__ returns a Range object and raises an ExcelError when given a range outside of excel's
         limit; 1,048,576 rows and 16,384 columns (the maximum column is XFD).
         """
-        assert isinstance(open_workbook['A1'], src.range.Range)
-        assert isinstance(open_workbook['A1:Z100'], src.range.Range)
+        assert isinstance(open_workbook['A1'], xl.Range)
+        assert isinstance(open_workbook['A1:Z100'], xl.Range)
         with pytest.raises(src.tools.ExcelError):
             assert open_workbook['A1:Z1048577']
         with pytest.raises(src.tools.ExcelError):
@@ -121,7 +119,7 @@ class TestBasicMethods:
 
     def test_active_sheet(self, open_workbook):
         """Test that the sheet attribute returns a Sheet object referencing the current active sheet."""
-        assert isinstance(open_workbook.active_sheet, src.sheet.Sheet)
+        assert isinstance(open_workbook.active_sheet, xl.Sheet)
         assert open_workbook.active_sheet.name == open_workbook.workbook.ActiveSheet.Name
 
     def test_sheet_exists(self, open_workbook):
