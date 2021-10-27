@@ -1,5 +1,5 @@
 """
-Module
+Contains helper functions. None are related to a specific Excel object.
 """
 import re
 
@@ -26,10 +26,10 @@ def format_values(values: Any, rows: int, col: int) -> Tuple[Tuple[Any, ...], ..
     Arguments:
          values: values to reshape. This can be a single value, or an iterable of values.
          rows: int, the number of tuples in the resulting tuple.
-         This should be equal to the number of rows in the range the
-         values will be written to.
+            This should be equal to the number of rows in the range the
+            values will be written to.
          cols: int, the number of values in each tuple inside the resulting tuple.
-         This should be equal to the number of columns in the range the values will be written to.
+            This should be equal to the number of columns in the range the values will be written to.
 
     Returns:
         Tuple.
