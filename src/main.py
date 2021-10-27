@@ -3,17 +3,14 @@
     Copyright (C) 2020 Chris Charlton
     <https://github.com/chrispcharlton/automate_excel/>
     <chrispcharlton@gmail.com>
-
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
@@ -23,7 +20,6 @@ import atexit
 import win32com.client
 import pywintypes
 import pandas as pd
-from typing import Tuple, Union
 
 from src import config, Sheet, Range
 from src.tools import get_extension, validate_file_type, ExcelError
@@ -31,14 +27,12 @@ from src.tools import get_extension, validate_file_type, ExcelError
 
 class Workbook():
     """Opens a connection to a Microsoft Excel application.
-
     Attributes:
         save_on_close: bool, if True, the open workbook will be automatically saved
         (if possible) when it is closed.
         quit_on_close: bool, if True, the application will be quit when a workbook is closed.
         app: win32com.client.dynamic.CDispatch, the connected Microsoft Excel application.
         workbook: win32com.client.dynamic.CDispatch, the open Excel workbook.
-
     Arguments:
         filepath: The path to a file to open with Microsoft Excel.
         visible: bool, if False the application will not appear as a visible window.
@@ -106,10 +100,8 @@ class Workbook():
     @active_sheet.setter
     def active_sheet(self, name:str):
         """Activates the given worksheet.
-
         Arguments:
             name: str, the name of the worksheet.
-
         Raises:
             ExcelError if name is not a sheet in the open workbook.
         """
@@ -125,10 +117,8 @@ class Workbook():
              quit_on_close:bool, display_alerts:bool, password: str or None,
              write_reserved_password:str or None):
         """Opens a Microsoft Excel application.
-
         If a string is passed to the filepath argument the application will attempt to open that file.
         If the file does not exist a new file will be opened and saved to the provided filepath.
-
         Arguments:
             filepath: The path to a file to open with Microsoft Excel.
             visible: bool, if False the application will not appear as a visible window.
@@ -142,10 +132,8 @@ class Workbook():
             write_reserved_password: str or None, the password required to write changes to
                 the file defined by filepath. Not necessary if the file is not password-protected
                 or you do not intend to write to the file.
-
         Returns:
             self
-
         Raises:
             ExcelError if a connection to the Microsoft Excel application could not be established.
             ExcelError if the file passed to filepath fails to open.
@@ -181,7 +169,6 @@ class Workbook():
 
     def close(self):
         """Closes the current open workbook.
-
         If the save_on_close attribute is True, the workbook will be saved before closing.
         If the quit_on_close attribute is True the Microsoft Excel application will be quit as
         well. Note that this will also close workbooks that were not opened with this instance
@@ -197,16 +184,12 @@ class Workbook():
 
     def sheet(self, name: str):
         """Returns a connection to a specific sheet.
-
         Note that this will not make the sheet the active sheet. It is generally preferable
         to interact with worksheets via the active_sheet property for this reason.
-
         Arguments:
             name: str, the name of the worksheet.
-
         Returns:
             A Sheet object.
-
         Raises:
             ExcelError if 'name' is not a sheet in the open workbook.
         """
@@ -216,10 +199,8 @@ class Workbook():
 
     def sheet_exists(self, name: str):
         """Checks if a worksheet exists in the open workbook.
-
         Arguments:
             name: str, the name of the worksheet.
-
         Returns:
             True if there is a sheet called 'name' in the open workbook, otherwise False.
         """
@@ -227,18 +208,14 @@ class Workbook():
 
     def add_sheet(self, name:str, before:str or None=None, after:str or None=None):
         """Creates a new sheet in the open workbook.
-
         If no sheet names are passed to before or after, the sheet will be created
         behind all existing sheets.
-
         Arguments:
             name: str, the name to give the new worksheet.
             before: str or None, name of the worksheet to insert the new worksheet in front of.
             after: str or None, name of the worksheet to insert the new worksheet behind.
-
         Returns:
             A Sheet object connected to the new worksheet.
-
         Raises:
             ExcelError if a sheet with the given name already exists in the open workbook.
         """
@@ -257,7 +234,6 @@ class Workbook():
 
     def save(self):
         """Saves the open workbook.
-
         Raises:
             ExcelError if saving failed.
         """
@@ -271,11 +247,9 @@ class Workbook():
                 write_reserved_password:str or None=None,
                 read_only_recommended:bool=False):
         """Saves the open workbook as a new file.
-
         The new file will become the open workbook. If the provided filepath includes a file
         extension, the new file will be of that type. Otherwise the new file type will be the
         default save format of the Microsoft Excel application being used.
-
         Arguments:
             filepath: The path to save the new file as.
             password: str or None, the password to add to the new file.
@@ -284,7 +258,6 @@ class Workbook():
                 If None the new file will not require a password to write to the file.
             read_only_recommended: bool, if True, the new file will prompt a user to choose between
                 read-only and write mode when opening the new file.
-
         Raises:
             ExcelError if the file can not be saved.
         """
@@ -304,13 +277,10 @@ class Workbook():
 
     def save_copy_as(self, filepath: str):
         """Saves a copy of the open workbook as a new file.
-
         The copy is a different file from the open workbook. When saving a copy, the filepath
         must include the file type extension.
-
         Arguments:
             filepath: The path to save the new file as.
-
         Raises:
             ExcelError if the file can not be saved.
         """
@@ -327,7 +297,6 @@ class Workbook():
 
     def calculate(self, active_sheet_only: bool=False):
         """Recalculates the values of any cells containing formulas.
-
         Arguments:
             active_sheet_only: bool, if True only formulas on the active sheet will be recalculated.
         """
@@ -350,10 +319,8 @@ class Workbook():
 
     def run_macro(self, name: str):
         """Runs a macro of the open workbook.
-
         Arguments:
             name: str, the name of the macro to run.
-
         Raises:
             ExcelError if an error occurs will trying to run the macro.
         """
@@ -365,13 +332,12 @@ class Workbook():
     def autofit(self):
         self.workbook.ActiveSheet.Columns.AutoFit()
 
+
 def excel2df(filepath: str, sheet_name: str):
     """Creates a dataframe based on a provided excel sheet.
-
     Arguments:
         filepath: str, the path to the excel file
         sheet_name: str, the specific sheet name to be converted
-
     Returns:
         A dataframe based on the sheet specified.
         """
