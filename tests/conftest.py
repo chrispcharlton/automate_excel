@@ -1,7 +1,7 @@
 import pytest
 import os
 import shutil
-from src.main import Workbook
+from src.workbook import Workbook
 
 WB_NUMBER = 0
 
