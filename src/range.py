@@ -6,7 +6,7 @@ import pywintypes
 import win32com.client
 
 from src import config
-from src.tools import ExcelError, format_values
+from src import tools
 
 
 class Range():
@@ -54,7 +54,7 @@ class Range():
                 self._range = application.Range(range)
         # pylint: disable=no-member
         except pywintypes.com_error as com_error:
-            raise ExcelError('Could not find range "' + range + '"') from com_error
+            raise tools.ExcelError('Could not find range "' + range + '"') from com_error
 
     def __len__(self):
         list_of_values = [element for tupl in self._range for element in tupl]
@@ -159,7 +159,11 @@ class Range():
         """
         if isinstance(values, pd.core.frame.DataFrame):
             values = tuple(map(tuple, values.values))
-        values = format_values(values, self.rows, self.columns)
+            row_offset = len(values)
+            column_offset = max([len(v) if tools.is_iter(v) else 1 for v in values])
+            end_cell = self.app.Range(self.start_cell).GetOffset(row_offset, column_offset).Address.replace('$', '')
+            self._range = self.app.Range(':'.join([self.start_cell, end_cell]))
+        values = tools.format_values(values, self.rows, self.columns)
         self._range.Value2 = values
 
     @name.setter
