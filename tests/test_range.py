@@ -1,3 +1,4 @@
+import src.range
 import src.tools
 from tests import testcases
 import src.main as xl
@@ -6,7 +7,7 @@ import pytest
 
 @pytest.mark.parametrize('testcase', testcases.padded_tuple_tests)
 def test_padded_tuple(testcase):
-    assert src.tools.format_values(testcase.values, testcase.x, testcase.y) == testcase.expected
+    assert src.range.format_values(testcase.values, testcase.x, testcase.y) == testcase.expected
 
 
 class TestRange:
@@ -19,7 +20,7 @@ class TestRange:
     @pytest.mark.parametrize('testcase', testcases.range_tests_fail)
     def test_values_fail(self, open_workbook, testcase):
         """Test that Range.values setter raises the correct exception when expected to fail."""
-        with pytest.raises(src.tools.ExcelError):
+        with pytest.raises(src.range.ExcelError):
             open_workbook[testcase.range] = testcase.values
 
     def test_name(self, open_workbook):

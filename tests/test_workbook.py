@@ -1,5 +1,6 @@
 import src.main
 import src.main as xl
+import src.range
 import src.tools
 from src import config
 import pytest
@@ -21,7 +22,7 @@ class TestBasicMethods:
 
     @pytest.mark.parametrize('filename', ['fail.mp3', 'fail.doc'])
     def test_open_fails(self, testdir, filename):
-        with pytest.raises(src.tools.ExcelError):
+        with pytest.raises(src.range.ExcelError):
             wb = xl.Workbook(testdir.joinpath(filename))
 
     def test_path_attrs(self, open_workbook):
@@ -88,11 +89,11 @@ class TestBasicMethods:
         Check that __getitem__ returns a Range object and raises an ExcelError when given a range outside of excel's
         limit; 1,048,576 rows and 16,384 columns (the maximum column is XFD).
         """
-        assert isinstance(open_workbook['A1'], src.main.Range)
-        assert isinstance(open_workbook['A1:Z100'], src.main.Range)
-        with pytest.raises(src.tools.ExcelError):
+        assert isinstance(open_workbook['A1'], src.range.Range)
+        assert isinstance(open_workbook['A1:Z100'], src.range.Range)
+        with pytest.raises(src.range.ExcelError):
             assert open_workbook['A1:Z1048577']
-        with pytest.raises(src.tools.ExcelError):
+        with pytest.raises(src.range.ExcelError):
             assert open_workbook['A1:XFE1']
 
     def test_setitem(self, open_workbook):
@@ -136,5 +137,5 @@ class TestBasicMethods:
         assert open_workbook.sheet_names == ['NewSheet2', 'Sheet1', 'NewSheet1']
         open_workbook.add_sheet('NewSheet3', after='Sheet1')
         assert open_workbook.sheet_names == ['NewSheet2', 'Sheet1', 'NewSheet3', 'NewSheet1']
-        with pytest.raises(src.tools.ExcelError):
+        with pytest.raises(src.range.ExcelError):
             open_workbook.add_sheet('NewSheet1')
