@@ -93,7 +93,7 @@ class TestRange:
         values = ((1, 2, 3), (4, 5, 6), (7, 8, 9))
         range.values = values
         range.number_format = '#,###.00_);[Red](#,###.00);0.00;"gross receipts for"@'
-        range.clear(type='formats')
+        range.clear_formatting()
         assert range.number_format == 'General'
         assert range.values == values
 
@@ -103,7 +103,7 @@ class TestRange:
         values = ((1, 2, 3), (4, 5, 6), (7, 8, 9))
         range.values = values
         range.comment = 'clear this!'
-        range.clear(type='comments')
+        range.clear_comments()
         assert range.comment is None
         assert range.values == values
 
@@ -113,7 +113,7 @@ class TestRange:
         values = ((1, 2, 3), (4, 5, 6), (7, 8, 9))
         range.values = values
         range.comment = "don't clear this!"
-        range.clear(type='contents')
+        range.clear_contents()
         assert range.comment == "don't clear this!"
         assert all(v is None for t in range.values for v in t)
 
@@ -124,7 +124,7 @@ class TestRange:
         range.values = values
         range.comment = "don't clear this!"
         range.number_format = '#,###.00_);[Red](#,###.00);0.00;"gross receipts for"@'
-        range.clear(type='all')
+        range.clear_all()
         assert range.comment is None
         assert range.number_format == 'General'
         assert all(v is None for t in range.values for v in t)
