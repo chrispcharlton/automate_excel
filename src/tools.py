@@ -1,9 +1,12 @@
+"""
+Contains helper functions. None are related to a specific Excel object.
+"""
 import re
-import numpy as np
 
 from datetime import datetime
 from datetime import timedelta
 from typing import Any, Tuple
+import numpy as np
 
 from src import config
 
@@ -16,15 +19,17 @@ def is_iter(value: Any) -> bool:
 def format_values(values: Any, rows: int, col: int) -> Tuple[Tuple[Any, ...], ...]:
     """Formats values into tuples appropriate for passing to an excel range.
 
-    Values will be transformed into a tuple containing 'rows' number of tuples, each of length 'cols'. These tuples are
-    padded with None. This format is essentially a sequence of row values.
+    Values will be transformed into a tuple containing 'rows' number of tuples, each of length
+    'cols'. These tuples are padded with None.
+    This format is essentially a sequence of row values.
 
     Arguments:
          values: values to reshape. This can be a single value, or an iterable of values.
-         rows: int, the number of tuples in the resulting tuple. This should be equal to the number of rows in the range the
+         rows: int, the number of tuples in the resulting tuple.
+            This should be equal to the number of rows in the range the
             values will be written to.
-         cols: int, the number of values in each tuple inside the resulting tuple. This should be equal to the number of
-            columns in the range the values will be written to.
+         cols: int, the number of values in each tuple inside the resulting tuple.
+            This should be equal to the number of columns in the range the values will be written to.
 
     Returns:
         Tuple.
@@ -51,13 +56,15 @@ def format_values(values: Any, rows: int, col: int) -> Tuple[Tuple[Any, ...], ..
 
 
 def get_extension(filepath: str) -> str:
-    """Returns the file extension from a filepath, the suffix delimited by (and including) the final fullstop.
+    """Returns the file extension from a filepath, the suffix delimited by (and including)
+    the final fullstop.
 
     Arguments:
         filepath: str, the path to a file. Can be full path or absolute.
 
     Returns:
-        The extension as a string, including the leading fullstop. If no suffix is found, returns None instead.
+        The extension as a string, including the leading fullstop.
+        If no suffix is found, returns None instead.
     """
     ext = ''.join(re.findall('\.[^.]*$', str(filepath)))
     return ext if ext else None
@@ -85,12 +92,14 @@ def validate_file_type(filepath: str) -> str:
 
 
 def number_to_date(number: int) -> datetime.date:
+    """Converts numbers to dates using datetime and timedelta"""
     date_origin = datetime(1899, 12, 30)
     new_date = date_origin + timedelta(days=number)
     return new_date
 
 
 def date_to_number(date: datetime.date) -> int:
+    """Converts dates to numbers using datetime"""
     date_origin = datetime(1899, 12, 30).date()
     number = (date - date_origin).days()
     return number
