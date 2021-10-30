@@ -1,4 +1,5 @@
 import pywintypes
+import functools
 
 from src import Workbook, config
 from src.tools import get_extension, ExcelError
@@ -19,6 +20,7 @@ class Sheet():
     """
     def __init__(self, workbook: Workbook, name: str=None):
         self.workbook = workbook
+        self.sheet = None
         if name:
             self.sheet = workbook.app.Worksheets(name)
         else:
@@ -33,6 +35,17 @@ class Sheet():
     def name(self, name: str):
         """Renames the worksheet."""
         self.sheet.Name = name
+
+    @property
+    def protected(self):
+        return self.sheet.ProtectContents
+
+    @protected.setter
+    def protected(self, set_to: bool):
+        if set_to:
+            self.sheet.Protect()
+        else:
+            self.sheet.Unprotect()
 
     def to_csv(self, path:str or None=None,
                password: str or None=None,
@@ -65,3 +78,18 @@ class Sheet():
     def open_in_new_workbook(self):
         """Opens a new workbook that contains only a copy of the sheet."""
         self.sheet.Copy()
+
+
+def run_without_protection(func):
+    """A decorator that allows a function to use a sheet unprotected and then reprotect it once complete. Specifically
+    for use in the Sheet class."""
+    def wrapper_unprotect(*args, **kwargs):
+        sheet = args[0]
+        if sheet.protected:
+            sheet.protected = False
+            func(*args, **kwargs)
+            sheet.protected = True
+        else:
+            func(*args, **kwargs)
+    return wrapper_unprotect
+
