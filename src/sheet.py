@@ -90,8 +90,3 @@ class Sheet():
     def open_in_new_workbook(self):
         """Opens a new workbook that contains only a copy of the sheet."""
         self.sheet.Copy()
-
-    @run_without_protection
-    def dumb_test(self):
-        print(self.protected)
-
