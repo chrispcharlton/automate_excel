@@ -1,6 +1,7 @@
 import src.main
 import src.main as xl
 import src.range
+import src.sheet
 import src.tools
 from src import config
 import pytest
@@ -121,7 +122,7 @@ class TestBasicMethods:
 
     def test_active_sheet(self, open_workbook):
         """Test that the sheet attribute returns a Sheet object referencing the current active sheet."""
-        assert isinstance(open_workbook.active_sheet, src.main.Sheet)
+        assert isinstance(open_workbook.active_sheet, src.sheet.Sheet)
         assert open_workbook.active_sheet.name == open_workbook.workbook.ActiveSheet.Name
 
     def test_sheet_exists(self, open_workbook):
