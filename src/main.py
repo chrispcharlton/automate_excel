@@ -98,7 +98,7 @@ class Workbook():
     @property
     def active_sheet(self):
         """Returns the name of the currently active worksheet as a string."""
-        return self.create_sheet()
+        return self._create_sheet()
 
     @active_sheet.setter
     def active_sheet(self, name:str):
@@ -198,7 +198,7 @@ class Workbook():
         """
         if not self.sheet_exists(name):
             raise ExcelError(f"No sheet named '{name}' in {self.name}.")
-        return self.create_sheet(name)
+        return self._create_sheet(name)
 
     def sheet_exists(self, name: str):
         """Checks if a worksheet exists in the open workbook.
@@ -233,7 +233,7 @@ class Workbook():
             newsheet.Name = name
         else:
             raise ExcelError(f"'{name}' is already a sheet in {self.name}.")
-        return self.create_sheet(name)
+        return self._create_sheet(name)
 
     def save(self):
         """Saves the open workbook.
@@ -335,7 +335,7 @@ class Workbook():
     def autofit(self):
         self.workbook.ActiveSheet.Columns.AutoFit()
 
-    def create_sheet(self, name: str=None):
+    def _create_sheet(self, name: str=None):
         """Creates a sheet object based on current Excel workbook and (optionally) provided name.
 
         Arguments:
