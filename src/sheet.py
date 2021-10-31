@@ -1,10 +1,24 @@
 import re
 
 import pywintypes
+import functools
 
 from src import config
 from src.range import ExcelError
 
+
+def run_without_protection(func):
+    """A decorator that allows a function to use a sheet unprotected and then reprotect it once complete. Specifically
+    for use in the Sheet class."""
+    def wrapper_unprotect(*args, **kwargs):
+        sheet = args[0]
+        if sheet.protected:
+            sheet.protected = False
+            func(*args, **kwargs)
+            sheet.protected = True
+        else:
+            func(*args, **kwargs)
+    return wrapper_unprotect
 
 class Sheet():
     """A specific worksheet in a Microsoft Excel workbook.
@@ -32,6 +46,17 @@ class Sheet():
     def name(self, name: str):
         """Renames the worksheet."""
         self.sheet.Name = name
+
+    @property
+    def protected(self):
+        return self.sheet.ProtectContents
+
+    @protected.setter
+    def protected(self, set_to: bool):
+        if set_to:
+            self.sheet.Protect()
+        else:
+            self.sheet.Unprotect()
 
     def to_csv(self, path:str or None=None,
                password: str or None=None,
@@ -65,7 +90,7 @@ class Sheet():
         """Opens a new workbook that contains only a copy of the sheet."""
         self.sheet.Copy()
 
-
+        
 def get_extension(filepath: str) -> str:
     """Returns the file extension from a filepath, the suffix delimited by (and including)
     the final fullstop.
@@ -79,3 +104,4 @@ def get_extension(filepath: str) -> str:
     """
     ext = ''.join(re.findall('\.[^.]*$', str(filepath)))
     return ext if ext else None
+  
