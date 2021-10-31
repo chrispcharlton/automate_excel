@@ -1,3 +1,4 @@
+import src.range
 import src.tools
 from tests import testcases
 import src.main as xl
@@ -6,7 +7,7 @@ import pytest
 
 @pytest.mark.parametrize('testcase', testcases.padded_tuple_tests)
 def test_padded_tuple(testcase):
-    assert src.tools.format_values(testcase.values, testcase.x, testcase.y) == testcase.expected
+    assert src.range.format_values(testcase.values, testcase.x, testcase.y) == testcase.expected
 
 
 class TestRange:
@@ -19,7 +20,7 @@ class TestRange:
     @pytest.mark.parametrize('testcase', testcases.range_tests_fail)
     def test_values_fail(self, open_workbook, testcase):
         """Test that Range.values setter raises the correct exception when expected to fail."""
-        with pytest.raises(src.tools.ExcelError):
+        with pytest.raises(src.range.ExcelError):
             open_workbook[testcase.range] = testcase.values
 
     def test_name(self, open_workbook):
@@ -93,7 +94,7 @@ class TestRange:
         values = ((1, 2, 3), (4, 5, 6), (7, 8, 9))
         range.values = values
         range.number_format = '#,###.00_);[Red](#,###.00);0.00;"gross receipts for"@'
-        range.clear(type='formats')
+        range.clear_formatting()
         assert range.number_format == 'General'
         assert range.values == values
 
@@ -103,7 +104,7 @@ class TestRange:
         values = ((1, 2, 3), (4, 5, 6), (7, 8, 9))
         range.values = values
         range.comment = 'clear this!'
-        range.clear(type='comments')
+        range.clear_comments()
         assert range.comment is None
         assert range.values == values
 
@@ -113,7 +114,7 @@ class TestRange:
         values = ((1, 2, 3), (4, 5, 6), (7, 8, 9))
         range.values = values
         range.comment = "don't clear this!"
-        range.clear(type='contents')
+        range.clear_contents()
         assert range.comment == "don't clear this!"
         assert all(v is None for t in range.values for v in t)
 
@@ -124,7 +125,7 @@ class TestRange:
         range.values = values
         range.comment = "don't clear this!"
         range.number_format = '#,###.00_);[Red](#,###.00);0.00;"gross receipts for"@'
-        range.clear(type='all')
+        range.clear_all()
         assert range.comment is None
         assert range.number_format == 'General'
         assert all(v is None for t in range.values for v in t)

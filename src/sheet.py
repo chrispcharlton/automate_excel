@@ -1,8 +1,10 @@
+import re
+
 import pywintypes
 import functools
 
-from src import Workbook, config
-from src.tools import get_extension, ExcelError
+from src import config
+from src.range import ExcelError
 
 
 def run_without_protection(func):
@@ -31,12 +33,9 @@ class Sheet():
         name: str or None, the name of the worksheet to access.
             If None, the active worksheet will be used.
     """
-    def __init__(self, workbook: Workbook, name: str=None):
-        self.workbook = workbook
-        if name:
-            self.sheet = workbook.app.Worksheets(name)
-        else:
-            self.sheet = workbook.app.ActiveSheet
+    def __init__(self, current_sheet, path, name: str=None):
+        self.sheet = current_sheet
+        self.path = path
 
     @property
     def name(self):
@@ -77,7 +76,7 @@ class Sheet():
             ExcelError if the .csv fails to save.
         """
         if path is None:
-            path = self.workbook.path.replace(get_extension(self.workbook.path), '')
+            path = self.path.replace(get_extension(self.path), '')
         if not get_extension(path) == '.csv':
             path = path + '.csv'
         try:
@@ -90,3 +89,19 @@ class Sheet():
     def open_in_new_workbook(self):
         """Opens a new workbook that contains only a copy of the sheet."""
         self.sheet.Copy()
+
+        
+def get_extension(filepath: str) -> str:
+    """Returns the file extension from a filepath, the suffix delimited by (and including)
+    the final fullstop.
+
+    Arguments:
+        filepath: str, the path to a file. Can be full path or absolute.
+
+    Returns:
+        The extension as a string, including the leading fullstop.
+        If no suffix is found, returns None instead.
+    """
+    ext = ''.join(re.findall('\.[^.]*$', str(filepath)))
+    return ext if ext else None
+  
