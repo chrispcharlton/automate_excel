@@ -1,12 +1,12 @@
 import re
-from typing import Union, Tuple
+from typing import Union, Tuple, Any
 
+import numpy as np
 import pandas as pd
 import pywintypes
 import win32com.client
 
 from src import config
-from src import tools
 
 
 class Range():
@@ -54,7 +54,7 @@ class Range():
                 self._range = application.Range(range)
         # pylint: disable=no-member
         except pywintypes.com_error as com_error:
-            raise tools.ExcelError('Could not find range "' + range + '"') from com_error
+            raise ExcelError('Could not find range "' + range + '"') from com_error
 
     def __len__(self):
         list_of_values = [element for tupl in self._range for element in tupl]
@@ -137,7 +137,7 @@ class Range():
         Arguments:
             text: str, the comment to add.
         """
-        self.clear('comments')
+        self.clear_comments()
         if text is not None:
             self._range.Cells(1).AddComment(text)
 
@@ -160,10 +160,10 @@ class Range():
         if isinstance(values, pd.core.frame.DataFrame):
             values = tuple(map(tuple, values.values))
             row_offset = len(values)
-            column_offset = max([len(v) if tools.is_iter(v) else 1 for v in values])
+            column_offset = max([len(v) if is_iter(v) else 1 for v in values])
             end_cell = self.app.Range(self.start_cell).GetOffset(row_offset, column_offset).Address.replace('$', '')
             self._range = self.app.Range(':'.join([self.start_cell, end_cell]))
-        values = tools.format_values(values, self.rows, self.columns)
+        values = format_values(values, self.rows, self.columns)
         self._range.Value2 = values
 
     @name.setter
@@ -263,6 +263,13 @@ class Range():
         self._range.ClearComments()
         self._range.ClearOutline()
 
+    def clear_contents(self):
+        """Removes only the contents of the range"""
+        self._range.ClearContents()
+
+    def clear_comments(self):
+        self._range.ClearComments()
+
     def data_validation_from_list(self, list: list):
         """Adds data validation to the range based on a list of values.
         This adds a drop down menu to the range allowing users to select a value based
@@ -274,3 +281,52 @@ class Range():
         formula = ','.join([str(i) for i in list])
         self._range.Validation.Delete()
         self._range.Validation.Add(Type=3, AlertStyle=1, Operator=1, Formula1=formula)
+
+
+def is_iter(value: Any) -> bool:
+    """Returns True if a value is a non-str iterable."""
+    return hasattr(value, '__iter__') and not isinstance(value, str)
+
+
+def format_values(values: Any, rows: int, col: int) -> Tuple[Tuple[Any, ...], ...]:
+    """Formats values into tuples appropriate for passing to an excel range.
+
+    Values will be transformed into a tuple containing 'rows' number of tuples, each of length
+    'cols'. These tuples are padded with None.
+    This format is essentially a sequence of row values.
+
+    Arguments:
+         values: values to reshape. This can be a single value, or an iterable of values.
+         rows: int, the number of tuples in the resulting tuple.
+            This should be equal to the number of rows in the range the
+            values will be written to.
+         cols: int, the number of values in each tuple inside the resulting tuple.
+            This should be equal to the number of columns in the range the values will be written to.
+
+    Returns:
+        Tuple.
+
+    Raises:
+        ExcelError if the passed values are longer than the passed (rows, columns) dimensions.
+    """
+    if not is_iter(values):
+        values = (values,)
+    elif any(is_iter(v) for v in values):
+        values = tuple(v if is_iter(v) else (v,) for v in values)
+    else:
+        values = (values,)
+    if len(values) > rows or max([len(v) if is_iter(v) else 1 for v in values]) > col:
+        raise ExcelError('Dimensions of values passed exceed dimensions of range.')
+    array = np.full(shape=(rows, col), fill_value=None)
+    for i, value in enumerate(values):
+        if isinstance(value, (list, tuple)):
+            for j, v in enumerate(value):
+                array[i, j] = v
+        else:
+            array[0, i] = value
+    return tuple(map(tuple, array))
+
+
+class ExcelError(Exception):
+    """Replaces pywintypes.com_error with more informative error messages."""
+    pass

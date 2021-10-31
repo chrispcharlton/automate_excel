@@ -17,12 +17,15 @@
 
 import os
 import atexit
+
 import win32com.client
 import pywintypes
 import pandas as pd
 
-from src import config, Sheet, Range
-from src.tools import get_extension, validate_file_type, ExcelError
+from src import config
+from src.sheet import Sheet
+from src.range import Range, ExcelError
+from src.sheet import get_extension
 
 
 class Workbook():
@@ -95,7 +98,7 @@ class Workbook():
     @property
     def active_sheet(self):
         """Returns the name of the currently active worksheet as a string."""
-        return Sheet(self)
+        return self._create_sheet()
 
     @active_sheet.setter
     def active_sheet(self, name:str):
@@ -195,7 +198,7 @@ class Workbook():
         """
         if not self.sheet_exists(name):
             raise ExcelError(f"No sheet named '{name}' in {self.name}.")
-        return Sheet(self, name)
+        return self._create_sheet(name)
 
     def sheet_exists(self, name: str):
         """Checks if a worksheet exists in the open workbook.
@@ -230,7 +233,7 @@ class Workbook():
             newsheet.Name = name
         else:
             raise ExcelError(f"'{name}' is already a sheet in {self.name}.")
-        return Sheet(self, name)
+        return self._create_sheet(name)
 
     def save(self):
         """Saves the open workbook.
@@ -332,6 +335,20 @@ class Workbook():
     def autofit(self):
         self.workbook.ActiveSheet.Columns.AutoFit()
 
+    def _create_sheet(self, name: str=None):
+        """Creates a sheet object based on current Excel workbook and (optionally) provided name.
+
+        Arguments:
+            name: str, the name of the sheet being created
+        Returns:
+            A sheet object from the current Workbook.
+        """
+        if name:
+            return Sheet(self.app.Worksheets(name), self.path)
+        else:
+            return Sheet(self.app.ActiveSheet, self.path)
+
+
 def excel2df(filepath: str, sheet_name: str):
     """Creates a dataframe based on a provided excel sheet.
     Arguments:
@@ -349,3 +366,26 @@ def excel2df(filepath: str, sheet_name: str):
     dataframe = pd.read_csv(temp_path)
     os.unlink(temp_path)
     return dataframe
+
+
+def validate_file_type(filepath: str) -> str:
+    """Checks if a file is a type that is supported by Microsoft Excel.
+
+    Supported formats are defined in the config file.
+
+    Arguments:
+        filepath: str, the path to a file. Can be full path or absolute.
+
+    Returns:
+        The passed filepath.
+
+    Raises:
+        ExcelError if the file type is not supported.
+    """
+    ext = get_extension(filepath)
+    if ext is not None:
+        if not ext in config.supported_exts:
+            raise ExcelError(f"Filetype {ext} is not a supported format for Microsoft Excel.")
+    return filepath
+
+

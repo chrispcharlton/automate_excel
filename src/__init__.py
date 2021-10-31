@@ -19,6 +19,6 @@
 """
 
 from .main import Workbook, excel2df
-from .range import Range
 from .sheet import Sheet
+from .range import Range
 from .tools import number_to_date, date_to_number
